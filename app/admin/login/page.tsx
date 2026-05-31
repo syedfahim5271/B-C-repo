@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createSessionToken, SESSION_COOKIE } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 async function doLogin(formData: FormData) {
   'use server'
   const password = formData.get('password') as string

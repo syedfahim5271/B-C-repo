@@ -1,10 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl  = process.env.SUPABASE_URL!
-const serviceKey   = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _client: SupabaseClient | null = null
 
-export const supabase = createClient(supabaseUrl, serviceKey, {
-  auth: { persistSession: false },
+function getClient(): SupabaseClient {
+  if (!_client) {
+    const url = process.env.SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) throw new Error('Supabase env vars not set. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.')
+    _client = createClient(url, key, { auth: { persistSession: false } })
+  }
+  return _client
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get: (_t, prop) => getClient()[prop as keyof SupabaseClient],
 })
 
 // ── Types ────────────────────────────────────────────────────
