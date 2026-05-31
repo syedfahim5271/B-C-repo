@@ -9,6 +9,7 @@ import { ChevronRight, ChevronLeft, Minus, Plus, Trash2, Tag, CheckCircle2, XCir
 import { useCartStore } from '@/store/cartStore'
 import { useOrderStore } from '@/store/orderStore'
 import { AREAS, PROMO_CODES } from '@/data/products'
+import { saveOrder, validatePromoCode } from '@/app/actions'
 
 interface DeliveryForm {
   name: string
@@ -58,10 +59,15 @@ export default function CheckoutForm() {
   const goNext = () => { setDirection(1);  setStep((s) => s + 1) }
   const goBack = () => { setDirection(-1); setStep((s) => s - 1) }
 
-  const applyPromo = () => {
+  const applyPromo = async () => {
     const code = promoInput.trim().toUpperCase()
     if (!code) return
-    if (PROMO_CODES[code]) {
+    // Check Supabase first, fall back to static list
+    const live = await validatePromoCode(code).catch(() => null)
+    if (live) {
+      setAppliedPromo(code)
+      setPromoError('')
+    } else if (PROMO_CODES[code]) {
       setAppliedPromo(code)
       setPromoError('')
     } else {
@@ -91,7 +97,10 @@ export default function CheckoutForm() {
       placedAt: new Date().toISOString(),
     }
 
-    // Persist to order history in localStorage
+    // Save to Supabase (non-blocking)
+    saveOrder(orderData).catch(console.error)
+
+    // Persist to local order history
     addOrder(orderData)
 
     // Pass to confirmation page via sessionStorage

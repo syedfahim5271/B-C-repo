@@ -5,10 +5,10 @@ import Image from 'next/image'
 import { Plus, Minus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/store/cartStore'
-import type { Product } from '@/data/products'
+import type { DBProduct } from '@/lib/supabase'
 
 interface Props {
-  product: Product
+  product: DBProduct
 }
 
 export default function ProductCard({ product }: Props) {
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: Props) {
   const qty = cartItem?.quantity ?? 0
 
   const handleAdd = () => {
-    addItem({ id: product.id, name: product.name, price: product.price, image: product.image })
+    addItem({ id: product.id, name: product.name, price: product.price, image: product.image_url })
     setBouncing(true)
     setTimeout(() => setBouncing(false), 400)
   }
@@ -40,7 +40,7 @@ export default function ProductCard({ product }: Props) {
       {/* Image */}
       <div className="relative w-full aspect-[4/3] overflow-hidden">
         <Image
-          src={product.image}
+          src={product.image_url}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-500 hover:scale-105"
