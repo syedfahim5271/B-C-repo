@@ -81,7 +81,7 @@ function OrderCard({ order }: { order: StoredOrder }) {
                 <p className="text-brand-cream/80">{order.delivery.name}</p>
                 <p className="text-brand-cream/60">{areaLabel} — {order.delivery.address}</p>
                 <p className="text-brand-cream/60">{order.delivery.phone}</p>
-                {order.delivery.note && <p className="text-brand-cream/40 italic">"{order.delivery.note}"</p>}
+                {order.delivery.note && <p className="text-brand-cream/40 italic">&ldquo;{order.delivery.note}&rdquo;</p>}
               </div>
 
               {/* WhatsApp follow-up */}
