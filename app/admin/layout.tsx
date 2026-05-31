@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { logoutAction } from './actions'
 
 const NAV = [
   { href: '/admin',           label: 'Dashboard',   icon: '📊' },
@@ -35,8 +34,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-3 border-t border-white/5">
-          <form action={logoutAction}>
-            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-cream/40 hover:text-brand-red hover:bg-white/5 transition-colors text-sm font-medium">
+          <form method="POST" action="/api/admin/logout">
+            <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-cream/40 hover:text-brand-red hover:bg-white/5 transition-colors text-sm font-medium">
               <span>🚪</span> Logout
             </button>
           </form>
