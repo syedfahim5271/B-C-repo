@@ -1,4 +1,6 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
+import { SESSION_COOKIE } from '@/lib/auth'
 
 const NAV = [
   { href: '/admin',           label: 'Dashboard',   icon: '📊' },
@@ -10,7 +12,13 @@ const NAV = [
   { href: '/admin/customers', label: 'Customers',    icon: '👥' },
 ]
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const isAuth = !!cookieStore.get(SESSION_COOKIE)?.value
+
+  // Login page — no sidebar
+  if (!isAuth) return <>{children}</>
+
   return (
     <div className="min-h-screen bg-brand-dark flex">
       {/* Sidebar */}
@@ -42,10 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   )
 }
