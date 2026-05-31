@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { DBOrder } from '@/lib/supabase'
 import Link from 'next/link'
+export const dynamic = 'force-dynamic'
+
 
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   return (

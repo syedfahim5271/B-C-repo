@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { DBPromo } from '@/lib/supabase'
 import { createPromo, togglePromo, deletePromo } from '../actions'
+export const dynamic = 'force-dynamic'
+
 
 export default async function PromosPage() {
   const { data } = await supabase.from('promo_codes').select('*').order('created_at', { ascending: false })

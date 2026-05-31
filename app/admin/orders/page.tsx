@@ -2,6 +2,8 @@ import { supabase } from '@/lib/supabase'
 import type { DBOrder } from '@/lib/supabase'
 import { updateOrderStatus } from '../actions'
 import { AREAS } from '@/data/products'
+export const dynamic = 'force-dynamic'
+
 
 const STATUS_OPTIONS = ['pending', 'confirmed', 'preparing', 'on-the-way', 'delivered', 'cancelled']
 

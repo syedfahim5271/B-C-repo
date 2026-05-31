@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { DBProduct } from '@/lib/supabase'
 import { upsertProduct, deleteProduct, toggleProductAvailability } from '../actions'
+export const dynamic = 'force-dynamic'
+
 
 export default async function MenuPage() {
   const { data } = await supabase.from('products').select('*').order('sort_order')

@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { DBOrder } from '@/lib/supabase'
 import { AREAS } from '@/data/products'
+export const dynamic = 'force-dynamic'
+
 
 export default async function CustomersPage() {
   const { data } = await supabase.from('orders').select('*').order('placed_at', { ascending: false })

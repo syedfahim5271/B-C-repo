@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { DBArea } from '@/lib/supabase'
 import { upsertArea, deleteArea, toggleArea } from '../actions'
+export const dynamic = 'force-dynamic'
+
 
 export default async function AreasPage() {
   const { data } = await supabase.from('areas').select('*').order('sort_order')
