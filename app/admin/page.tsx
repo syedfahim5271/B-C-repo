@@ -13,9 +13,8 @@ function StatCard({ label, value, sub, color }: { label: string; value: string |
 }
 
 export default async function AdminDashboard() {
-  const [ordersRes, productsRes] = await Promise.all([
+  const [ordersRes] = await Promise.all([
     supabase.from('orders').select('*').order('placed_at', { ascending: false }).limit(200),
-    supabase.from('products').select('id, name').eq('is_available', true),
   ])
 
   const orders: DBOrder[] = ordersRes.data ?? []
