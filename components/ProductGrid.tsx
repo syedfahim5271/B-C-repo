@@ -8,9 +8,10 @@ interface Props { products: DBProduct[] }
 export default function ProductGrid({ products }: Props) {
   if (products.length === 0) {
     return (
-      <div className="px-4 py-12 text-center text-brand-cream/30">
+      <div className="px-4 py-12 text-center text-brand-cream/60">
         <p className="text-4xl mb-3">🍛</p>
-        <p>Menu coming soon!</p>
+        <p className="font-display font-bold text-lg text-brand-cream">Sold out today.</p>
+        <p className="mt-1">Thanks for the love! See you soon...</p>
       </div>
     )
   }

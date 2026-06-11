@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { ShoppingCart, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/store/cartStore'
 
 export default function CartBar() {
   const router = useRouter()
+  const pathname = usePathname()
   const { items, openDrawer } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [prevCount, setPrevCount] = useState(0)
@@ -28,7 +29,10 @@ export default function CartBar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, mounted])
 
-  if (!mounted || totalItems === 0) return null
+  // Hide the floating checkout bar once the user is already in the checkout flow
+  const hideOnRoute = pathname === '/checkout' || pathname === '/confirmation'
+
+  if (!mounted || totalItems === 0 || hideOnRoute) return null
 
   return (
     <AnimatePresence>

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { SESSION_COOKIE } from '@/lib/auth'
+import OrderNotifier from '@/components/admin/OrderNotifier'
 
 const NAV = [
   { href: '/admin',           label: 'Dashboard',   icon: '📊' },
@@ -51,6 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </aside>
 
       <main className="flex-1 overflow-auto">{children}</main>
+      <OrderNotifier />
     </div>
   )
 }

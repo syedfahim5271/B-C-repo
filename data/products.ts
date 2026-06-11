@@ -51,8 +51,8 @@ export const AREAS = [
   { id: 'mohammadpur', label: 'Mohammadpur', emoji: '🕌' },
 ]
 
-export const WHATSAPP_NUMBER = '88001686600954'
-export const PHONE_NUMBER = '+88001686600954'
+export const WHATSAPP_NUMBER = '8801810098964'
+export const PHONE_NUMBER = '01810098964'
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi!%20I%20want%20to%20place%20an%20order%20%F0%9F%8D%9A`
 
 export interface PromoCode {

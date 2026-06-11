@@ -33,6 +33,13 @@ export async function logoutAction() {
 
 // ── Orders ──────────────────────────────────────────────────
 
+export async function getOrdersCount(): Promise<number> {
+  const { count } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+  return count ?? 0
+}
+
 export async function updateOrderStatus(id: string, status: string) {
   await supabase.from('orders').update({ status }).eq('id', id)
   revalidatePath('/admin')
