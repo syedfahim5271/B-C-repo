@@ -48,14 +48,59 @@ export async function updateOrderStatus(id: string, status: string) {
 
 // ── Menu ────────────────────────────────────────────────────
 
+const IMAGE_BUCKET = 'product-images'
+
+// Upload a product image to Supabase Storage and return its public URL.
+async function uploadProductImage(file: File): Promise<string> {
+  // Ensure the bucket exists (no-op error if it already does).
+  await supabase.storage.createBucket(IMAGE_BUCKET, { public: true }).catch(() => {})
+
+  const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  const { error } = await supabase.storage
+    .from(IMAGE_BUCKET)
+    .upload(path, buffer, { contentType: file.type || 'image/jpeg', upsert: false })
+  if (error) throw new Error(`Image upload failed: ${error.message}`)
+
+  return supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl
+}
+
+// Convert a Google Drive *share* link into a direct-view link. Drive's
+// /file/d/<ID>/view URLs serve an HTML page, not the image itself.
+function normalizeImageUrl(url: string): string {
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+  const fileMatch = trimmed.match(/drive\.google\.com\/file\/d\/([^/]+)/)
+  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`
+  const idMatch = trimmed.match(/[?&]id=([^&]+)/)
+  if (trimmed.includes('drive.google.com') && idMatch) {
+    return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`
+  }
+  return trimmed
+}
+
 export async function upsertProduct(formData: FormData) {
   const id = (formData.get('id') as string) || (formData.get('name') as string).toLowerCase().replace(/\s+/g, '-')
+
+  // Resolve the image: uploaded file takes priority, then a pasted URL,
+  // otherwise keep whatever was already there (or fall back to the default).
+  const file = formData.get('image_file')
+  let imageUrl = ''
+  if (file instanceof File && file.size > 0) {
+    imageUrl = await uploadProductImage(file)
+  } else {
+    imageUrl = normalizeImageUrl((formData.get('image_url') as string) || '')
+  }
+  if (!imageUrl) imageUrl = '/food-hero.png'
+
   await supabase.from('products').upsert({
     id,
     name:         formData.get('name'),
     description:  formData.get('description'),
     price:        Number(formData.get('price')),
-    image_url:    formData.get('image_url') || '/food-hero.png',
+    image_url:    imageUrl,
     badge:        formData.get('badge') || null,
     is_available: formData.get('is_available') === 'true',
     sort_order:   Number(formData.get('sort_order')) || 0,
