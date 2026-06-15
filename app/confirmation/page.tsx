@@ -1,22 +1,31 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { MessageCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { WHATSAPP_NUMBER, AREAS } from '@/data/products'
 
+// Meta Pixel's fbq is injected globally by the base code; type it loosely here.
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void
+  }
+}
+
 interface OrderData {
   orderNumber: string
   items: { name: string; price: number; quantity: number }[]
   subtotal: number
+  total?: number
   delivery: { name: string; phone: string; area: string; address: string; note?: string }
 }
 
 export default function ConfirmationPage() {
   const router = useRouter()
   const [order, setOrder] = useState<OrderData | null>(null)
+  const purchaseTracked = useRef(false)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('bc-order')
@@ -24,8 +33,18 @@ export default function ConfirmationPage() {
       router.replace('/')
       return
     }
-    setOrder(JSON.parse(stored))
+    const parsed: OrderData = JSON.parse(stored)
+    setOrder(parsed)
     sessionStorage.removeItem('bc-order')
+
+    // Fire the Meta Pixel Purchase event once, only on this success page.
+    if (!purchaseTracked.current && typeof window !== 'undefined' && typeof window.fbq === 'function') {
+      purchaseTracked.current = true
+      window.fbq('track', 'Purchase', {
+        value: parsed.total ?? parsed.subtotal ?? 0,
+        currency: 'BDT',
+      })
+    }
   }, [router])
 
   if (!order) {
