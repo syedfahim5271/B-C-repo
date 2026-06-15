@@ -37,25 +37,34 @@ export default function OrderNotifier() {
     if (!ctx) return
     if (ctx.state === 'suspended') ctx.resume()
     const now = ctx.currentTime
-    // Two-note "ding-dong" played twice for attention
-    const notes = [
-      { freq: 880,  start: 0.0,  dur: 0.18 },
-      { freq: 1320, start: 0.16, dur: 0.32 },
-      { freq: 880,  start: 0.58, dur: 0.18 },
-      { freq: 1320, start: 0.74, dur: 0.36 },
+
+    // A two-note "ding-dong" repeated several times so the alert lasts ~3s
+    // and is hard to miss.
+    const pattern = [
+      { freq: 880,  dur: 0.20 },
+      { freq: 1320, dur: 0.34 },
     ]
-    notes.forEach(({ freq, start, dur }) => {
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.value = freq
-      gain.gain.setValueAtTime(0.0001, now + start)
-      gain.gain.exponentialRampToValueAtTime(0.4, now + start + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur)
-      osc.connect(gain).connect(ctx.destination)
-      osc.start(now + start)
-      osc.stop(now + start + dur)
-    })
+    const CYCLES = 5       // number of ding-dong repeats
+    const GAP = 0.16       // pause between repeats
+    const NOTE_GAP = 0.05  // pause between the two notes
+
+    let t = 0
+    for (let cycle = 0; cycle < CYCLES; cycle++) {
+      for (const { freq, dur } of pattern) {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'sine'
+        osc.frequency.value = freq
+        gain.gain.setValueAtTime(0.0001, now + t)
+        gain.gain.exponentialRampToValueAtTime(0.6, now + t + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + t + dur)
+        osc.connect(gain).connect(ctx.destination)
+        osc.start(now + t)
+        osc.stop(now + t + dur)
+        t += dur + NOTE_GAP
+      }
+      t += GAP
+    }
   }
 
   // Auto-unlock audio on the first user interaction anywhere in the admin.
