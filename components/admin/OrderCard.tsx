@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { DBOrder } from '@/lib/supabase'
 import { updateOrderStatus } from '@/app/admin/actions'
 import { AREAS } from '@/data/products'
+import PrintInvoiceButton from './PrintInvoiceButton'
 
 const STATUS_FLOW = [
   { value: 'pending',    label: 'Pending',    color: 'bg-yellow-500/20 text-yellow-400',  next: 'confirmed'  },
@@ -109,6 +110,9 @@ export default function OrderCard({ order }: { order: DBOrder }) {
               <p className="text-brand-cream/40 italic text-xs">&ldquo;{order.delivery.note}&rdquo;</p>
             )}
           </div>
+
+          {/* Print invoice (Bluetooth thermal printer) */}
+          <PrintInvoiceButton order={order} areaLabel={areaLabel} />
 
           {/* Status quick actions */}
           {status !== 'delivered' && status !== 'cancelled' && (
