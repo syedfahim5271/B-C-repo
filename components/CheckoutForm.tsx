@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft, Minus, Plus, Trash2, Tag, CheckCircle2, XCircle } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useOrderStore } from '@/store/orderStore'
-import { AREAS, PROMO_CODES } from '@/data/products'
+import { PROMO_CODES } from '@/data/products'
 import { saveOrder, validatePromoCode } from '@/app/actions'
+import type { DBArea } from '@/lib/supabase'
 
 interface DeliveryForm {
   name: string
@@ -25,7 +26,9 @@ const stepVariants = {
   exit:   (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
 }
 
-export default function CheckoutForm() {
+interface Props { areas: DBArea[] }
+
+export default function CheckoutForm({ areas }: Props) {
   const router = useRouter()
   const { items, selectedArea, updateQuantity, clearCart } = useCartStore()
   const { addOrder } = useOrderStore()
@@ -279,7 +282,7 @@ export default function CheckoutForm() {
                 <select {...register('area', { required: 'Select your delivery area' })} data-testid="input-area"
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-brand-cream focus:outline-none focus:border-brand-yellow/60 transition-colors appearance-none">
                   <option value="" disabled className="bg-brand-dark">Select area</option>
-                  {AREAS.map((a) => <option key={a.id} value={a.id} className="bg-brand-dark">{a.emoji} {a.label}</option>)}
+                  {areas.map((a) => <option key={a.id} value={a.id} className="bg-brand-dark">{a.emoji} {a.label}</option>)}
                 </select>
                 {errors.area && <p className="text-brand-red text-sm mt-1.5" data-testid="error-area">{errors.area.message}</p>}
               </div>
@@ -354,7 +357,7 @@ export default function CheckoutForm() {
               {([
                 ['Name',    getValues('name')],
                 ['Phone',   getValues('phone')],
-                ['Area',    AREAS.find((a) => a.id === getValues('area'))?.label ?? getValues('area')],
+                ['Area',    areas.find((a) => a.id === getValues('area'))?.label ?? getValues('area')],
                 ['Address', getValues('address')],
                 ...(getValues('note') ? [['Note', getValues('note')]] : []),
               ] as [string, string][]).map(([label, value]) => (
