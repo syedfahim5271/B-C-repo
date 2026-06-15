@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Sora, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
+import ClosedBanner from '@/components/ClosedBanner'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CartDrawer from '@/components/CartDrawer'
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sora.variable} ${jakarta.variable}`}>
       <body className="font-body bg-brand-dark text-brand-cream min-h-screen">
+        <ClosedBanner />
         <Header />
         <main className="pb-28">{children}</main>
         <Footer />
