@@ -9,7 +9,7 @@ export default async function AreasPage() {
   const areas: DBArea[] = data ?? []
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <h1 className="font-display font-bold text-2xl text-brand-cream">Delivery Areas</h1>
 
       {/* Add area */}

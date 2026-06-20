@@ -35,3 +35,9 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .text-balance { text-wrap: balance; }
   .min-tap { min-height: 44px; min-width: 44px; }
 }
+
+/* Admin mobile drawer slide-in */
+@keyframes slidein {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}

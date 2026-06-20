@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 import { SESSION_COOKIE } from '@/lib/auth'
 import OrderNotifier from '@/components/admin/OrderNotifier'
+import AdminSidebar, { type NavItem } from '@/components/admin/AdminSidebar'
 
-const NAV = [
+const NAV: NavItem[] = [
   { href: '/admin',           label: 'Dashboard',   icon: '📊' },
   { href: '/admin/orders',    label: 'Orders',       icon: '📦' },
   { href: '/admin/menu',      label: 'Menu',         icon: '🍛' },
@@ -21,37 +21,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isAuth) return <>{children}</>
 
   return (
-    <div className="min-h-screen bg-brand-dark flex">
-      {/* Sidebar */}
-      <aside className="w-56 bg-brand-darker border-r border-white/5 flex flex-col flex-shrink-0">
-        <div className="p-5 border-b border-white/5">
-          <p className="font-display font-bold text-brand-yellow text-base">B&amp;C Admin</p>
-          <p className="text-brand-cream/30 text-xs mt-0.5">Biryani &amp; Chill</p>
-        </div>
-
-        <nav className="flex-1 p-3 space-y-0.5">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-cream/60 hover:text-brand-cream hover:bg-white/5 transition-colors text-sm font-medium"
-            >
-              <span className="text-base">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-3 border-t border-white/5">
-          <form method="POST" action="/api/admin/logout">
-            <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-brand-cream/40 hover:text-brand-red hover:bg-white/5 transition-colors text-sm font-medium">
-              <span>🚪</span> Logout
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      <main className="flex-1 overflow-auto">{children}</main>
+    <div className="min-h-screen bg-brand-dark md:flex">
+      <AdminSidebar nav={NAV} />
+      <main className="flex-1 overflow-auto min-w-0">{children}</main>
       <OrderNotifier />
     </div>
   )

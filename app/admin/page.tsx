@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
   const recent = orders.slice(0, 8)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <div>
         <h1 className="font-display font-bold text-2xl text-brand-cream">Dashboard</h1>
         <p className="text-brand-cream/40 text-sm mt-0.5">Welcome back 👋</p>

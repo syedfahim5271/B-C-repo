@@ -42,7 +42,7 @@ export default function OrderCard({ order }: { order: DBOrder }) {
       {/* Header row — always visible, click to expand */}
       <button
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left"
+        className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -68,7 +68,7 @@ export default function OrderCard({ order }: { order: DBOrder }) {
 
       {/* Expanded detail */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-white/8 space-y-4 pt-4">
+        <div className="px-4 sm:px-5 pb-5 border-t border-white/8 space-y-4 pt-4">
           {/* Items */}
           <div className="space-y-2">
             <p className="text-brand-cream/40 text-xs uppercase tracking-widest font-medium">Items</p>

@@ -12,7 +12,7 @@ export default async function BannerPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-xl">
+    <div className="p-4 md:p-6 space-y-6 max-w-xl">
       <h1 className="font-display font-bold text-2xl text-brand-cream">Banner</h1>
 
       {/* Live preview */}

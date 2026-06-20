@@ -30,7 +30,7 @@ export default async function OrdersPage({
     : orders
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 md:p-6 space-y-5">
       <div>
         <h1 className="font-display font-bold text-2xl text-brand-cream">Orders</h1>
         <p className="text-brand-cream/40 text-sm mt-0.5">{filtered.length} order{filtered.length !== 1 ? 's' : ''}</p>

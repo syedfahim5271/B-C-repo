@@ -27,7 +27,7 @@ export default async function CustomersPage() {
   const customers = Object.values(customerMap).sort((a, b) => b.totalSpent - a.totalSpent)
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 md:p-6 space-y-5">
       <div>
         <h1 className="font-display font-bold text-2xl text-brand-cream">Customers</h1>
         <p className="text-brand-cream/40 text-sm">{customers.length} unique customers</p>
