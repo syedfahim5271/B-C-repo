@@ -27,9 +27,11 @@ export default function HeroBanner({ banner }: Props) {
         <div className="absolute inset-0 bg-gradient-to-r from-brand-darker via-brand-darker/80 to-transparent" />
       </div>
       <div className="relative z-10 px-6 py-8 max-w-xs sm:max-w-sm">
-        <span className="inline-block bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full mb-3 tracking-wide uppercase">
-          {b.badge_text}
-        </span>
+        {b.badge_text ? (
+          <span className="inline-block bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full mb-3 tracking-wide uppercase">
+            {b.badge_text}
+          </span>
+        ) : null}
         <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-brand-cream leading-tight mb-2">
           {b.title}
         </h2>
