@@ -35,8 +35,8 @@ export default function HeroBanner({ banner }: Props) {
         <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-brand-cream leading-tight mb-2">
           {b.title}
         </h2>
-        <p className="text-brand-cream/60 text-sm mb-4 leading-relaxed">{b.subtitle}</p>
-        {b.promo_hint ? <p className="text-brand-cream/40 text-xs">{b.promo_hint}</p> : null}
+        <p className="text-brand-cream font-bold text-base sm:text-lg mb-2 leading-snug">{b.subtitle}</p>
+        {b.promo_hint ? <p className="text-brand-cream/50 text-xs sm:text-sm">{b.promo_hint}</p> : null}
         <span className="inline-flex items-center gap-1 mt-3 text-brand-yellow text-sm font-semibold">
           Get your referral code →
         </span>
