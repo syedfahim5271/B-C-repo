@@ -146,7 +146,7 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
       </section>
 
       {/* ---- Referral code ---- */}
-      <section className="bg-gradient-to-br from-brand-yellow/15 to-white/5 border border-brand-yellow/20 rounded-2xl p-5">
+      <section id="referral" className="scroll-mt-20 bg-gradient-to-br from-brand-yellow/15 to-white/5 border border-brand-yellow/20 rounded-2xl p-5">
         <h2 className="font-display font-semibold text-brand-cream mb-1">Your Referral Code</h2>
         <p className="text-brand-cream/50 text-sm mb-4">Share it — friends get 25% off, and you earn a 25% reward for each one who orders.</p>
         <div className="flex items-center gap-2 mb-3">
