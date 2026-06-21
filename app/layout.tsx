@@ -7,6 +7,8 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CartDrawer from '@/components/CartDrawer'
 import CartBar from '@/components/CartBar'
+import Providers from '@/components/auth/Providers'
+import AuthModals from '@/components/auth/AuthModals'
 
 const sora = Sora({
   subsets: ['latin'],
@@ -69,12 +71,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           />
         </noscript>
 
-        <ClosedBanner />
-        <Header />
-        <main className="pb-28">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <CartBar />
+        <Providers>
+          <ClosedBanner />
+          <Header />
+          <main className="pb-28">{children}</main>
+          <Footer />
+          <CartDrawer />
+          <CartBar />
+          <AuthModals />
+        </Providers>
       </body>
     </html>
   )

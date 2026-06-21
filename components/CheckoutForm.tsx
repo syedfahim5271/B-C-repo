@@ -6,11 +6,14 @@ import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, ChevronLeft, Minus, Plus, Trash2, Tag, CheckCircle2, XCircle } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useCartStore } from '@/store/cartStore'
 import { useOrderStore } from '@/store/orderStore'
 import { PROMO_CODES } from '@/data/products'
-import { saveOrder, validatePromoCode } from '@/app/actions'
-import type { DBArea } from '@/lib/supabase'
+import { saveOrder, validatePromoCode, updateProfile } from '@/app/actions'
+import type { PromoKind } from '@/lib/promo'
+import SignInPrompt from '@/components/auth/SignInPrompt'
+import type { DBArea, DBUser } from '@/lib/supabase'
 
 interface DeliveryForm {
   name: string
@@ -20,16 +23,26 @@ interface DeliveryForm {
   note?: string
 }
 
+interface AppliedPromo {
+  code: string
+  type: 'percent' | 'flat'
+  discount: number
+  label: string
+  kind: PromoKind
+  referrerId?: string
+}
+
 const stepVariants = {
   enter:  (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
   center: { x: 0, opacity: 1 },
   exit:   (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
 }
 
-interface Props { areas: DBArea[] }
+interface Props { areas: DBArea[]; user: DBUser | null }
 
-export default function CheckoutForm({ areas }: Props) {
+export default function CheckoutForm({ areas, user }: Props) {
   const router = useRouter()
+  const { status } = useSession()
   const { items, selectedArea, updateQuantity, clearCart } = useCartStore()
   const { addOrder } = useOrderStore()
 
@@ -38,25 +51,29 @@ export default function CheckoutForm({ areas }: Props) {
   const [submitting, setSubmitting] = useState(false)
 
   // Promo code state
-  const [promoInput, setPromoInput]     = useState('')
-  const [appliedPromo, setAppliedPromo] = useState<string | null>(null)
-  const [promoError, setPromoError]     = useState('')
+  const [promoInput, setPromoInput]   = useState('')
+  const [applied, setApplied]         = useState<AppliedPromo | null>(null)
+  const [promoError, setPromoError]   = useState('')
 
   const DELIVERY_CHARGE = 30
 
   const subtotal   = items.reduce((s, i) => s + i.price * i.quantity, 0)
   const totalItems = items.reduce((s, i) => s + i.quantity, 0)
 
-  const promoData  = appliedPromo ? PROMO_CODES[appliedPromo] : null
-  const discount   = promoData
-    ? promoData.type === 'percent'
-      ? Math.round(subtotal * promoData.discount / 100)
-      : promoData.discount
+  const discount = applied
+    ? applied.type === 'percent'
+      ? Math.round(subtotal * applied.discount / 100)
+      : applied.discount
     : 0
   const total = subtotal - discount + DELIVERY_CHARGE
 
   const { register, handleSubmit, formState: { errors }, getValues } = useForm<DeliveryForm>({
-    defaultValues: { area: selectedArea || '' },
+    defaultValues: {
+      name:    user?.name ?? '',
+      phone:   user?.phone ?? '',
+      area:    user?.area ?? selectedArea ?? '',
+      address: user?.address ?? '',
+    },
   })
 
   const goNext = () => { setDirection(1);  setStep((s) => s + 1) }
@@ -65,22 +82,31 @@ export default function CheckoutForm({ areas }: Props) {
   const applyPromo = async () => {
     const code = promoInput.trim().toUpperCase()
     if (!code) return
-    // Check Supabase first, fall back to static list
-    const live = await validatePromoCode(code).catch(() => null)
-    if (live) {
-      setAppliedPromo(code)
+    // Validate against Supabase (promo / reward / referral codes).
+    const result = await validatePromoCode(code).catch(() => null)
+    if (result && result.kind !== 'invalid') {
+      setApplied({
+        code: result.code,
+        type: result.type,
+        discount: result.discount,
+        label: result.label,
+        kind: result.kind,
+        referrerId: result.kind === 'referral' ? result.referrerId : undefined,
+      })
       setPromoError('')
     } else if (PROMO_CODES[code]) {
-      setAppliedPromo(code)
+      // Offline fallback for the seeded marketing codes.
+      const p = PROMO_CODES[code]
+      setApplied({ code, type: p.type, discount: p.discount, label: p.label, kind: 'promo' })
       setPromoError('')
     } else {
-      setPromoError('Invalid promo code. Try FIRSTORDER or CHILL20.')
-      setAppliedPromo(null)
+      setPromoError(result?.kind === 'invalid' ? result.reason : 'Invalid promo code. Try FIRSTORDER or CHILL20.')
+      setApplied(null)
     }
   }
 
   const removePromo = () => {
-    setAppliedPromo(null)
+    setApplied(null)
     setPromoInput('')
     setPromoError('')
   }
@@ -95,13 +121,23 @@ export default function CheckoutForm({ areas }: Props) {
       subtotal,
       discount,
       total,
-      promoCode: appliedPromo ?? undefined,
+      promoCode: applied?.code,
       delivery: data,
       placedAt: new Date().toISOString(),
     }
 
-    // Save to Supabase (non-blocking)
-    saveOrder(orderData).catch(console.error)
+    // Save to Supabase (non-blocking), incl. promo kind so referral/reward
+    // side-effects fire server-side.
+    saveOrder({
+      ...orderData,
+      promoKind: applied?.kind,
+      referrerId: applied?.referrerId,
+    }).catch(console.error)
+
+    // Persist any edited details back to the user's profile (non-blocking).
+    if (user) {
+      updateProfile({ name: data.name, phone: data.phone, area: data.area, address: data.address }).catch(console.error)
+    }
 
     // Persist to local order history
     addOrder(orderData)
@@ -111,6 +147,21 @@ export default function CheckoutForm({ areas }: Props) {
     clearCart()
 
     setTimeout(() => router.push('/confirmation'), 300)
+  }
+
+  if (status === 'loading') {
+    return <div className="py-24 text-center text-brand-cream/40">Loading…</div>
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <SignInPrompt
+        emoji="🔒"
+        title="Sign in to check out"
+        subtitle="Log in with Google to place your order — we'll save your details for next time."
+        cta="Sign in with Google"
+      />
+    )
   }
 
   if (items.length === 0 && step === 1) {
@@ -186,13 +237,13 @@ export default function CheckoutForm({ areas }: Props) {
                 Promo Code
               </p>
 
-              {appliedPromo ? (
+              {applied ? (
                 <div className="flex items-center justify-between bg-brand-yellow/10 border border-brand-yellow/30 rounded-xl px-4 py-3">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 size={16} className="text-brand-yellow" />
                     <div>
-                      <p className="text-brand-yellow font-bold text-sm">{appliedPromo}</p>
-                      <p className="text-brand-cream/50 text-xs">{promoData?.label} applied!</p>
+                      <p className="text-brand-yellow font-bold text-sm">{applied.code}</p>
+                      <p className="text-brand-cream/50 text-xs">{applied.label} applied!</p>
                     </div>
                   </div>
                   <button onClick={removePromo} className="text-brand-cream/40 hover:text-brand-cream transition-colors" aria-label="Remove promo">
@@ -237,7 +288,7 @@ export default function CheckoutForm({ areas }: Props) {
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-brand-yellow/80">Discount ({appliedPromo})</span>
+                  <span className="text-brand-yellow/80">Discount ({applied?.code})</span>
                   <span className="text-brand-yellow font-semibold">−৳{discount}</span>
                 </div>
               )}
@@ -340,7 +391,7 @@ export default function CheckoutForm({ areas }: Props) {
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-brand-yellow/80">Discount ({appliedPromo})</span>
+                    <span className="text-brand-yellow/80">Discount ({applied?.code})</span>
                     <span className="text-brand-yellow font-semibold">−৳{discount}</span>
                   </div>
                 )}

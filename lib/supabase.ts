@@ -70,3 +70,28 @@ export interface DBPromo {
   usage_count: number
   created_at: string
 }
+
+export interface DBUser {
+  id: string
+  google_id: string
+  email: string | null
+  name: string | null
+  phone: string | null
+  area: string | null
+  address: string | null
+  referral_code: string
+  created_at: string
+  updated_at: string
+}
+
+export interface DBReward {
+  id: string
+  code: string
+  referrer_id: string
+  referred_user_id: string | null
+  source_order: string | null
+  is_used: boolean
+  used_at: string | null
+  used_order: string | null
+  created_at: string
+}

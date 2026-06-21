@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { ShoppingCart, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSession } from 'next-auth/react'
 import { useCartStore } from '@/store/cartStore'
+import { useAuthUi } from '@/store/authUiStore'
 
 export default function CartBar() {
   const router = useRouter()
   const pathname = usePathname()
+  const { status } = useSession()
+  const { openLogin } = useAuthUi()
   const { items, openDrawer } = useCartStore()
   const [mounted, setMounted] = useState(false)
   const [prevCount, setPrevCount] = useState(0)
@@ -28,6 +32,12 @@ export default function CartBar() {
     setPrevCount(totalItems)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalItems, mounted])
+
+  const goToCheckout = () => router.push('/checkout')
+  const handleCheckout = () => {
+    if (status === 'authenticated') goToCheckout()
+    else openLogin(goToCheckout) // login popup first, then continue to checkout
+  }
 
   // Hide the floating checkout bar once the user is already in the checkout flow
   const hideOnRoute = pathname === '/checkout' || pathname === '/confirmation'
@@ -79,7 +89,7 @@ export default function CartBar() {
 
             {/* Checkout CTA */}
             <button
-              onClick={() => router.push('/checkout')}
+              onClick={handleCheckout}
               data-testid="checkout-btn"
               className="flex items-center gap-2 bg-brand-dark text-brand-cream font-bold text-sm px-5 py-3 rounded-xl hover:bg-brand-dark/80 transition-colors active:scale-95"
               aria-label="Go to checkout"

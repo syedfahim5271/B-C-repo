@@ -30,6 +30,9 @@ Required (in `.env.local` locally, and in the host's env in production). `.env*.
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — Supabase project + **service-role** key (server-only; see below).
 - `ADMIN_PASSWORD` — plaintext password checked at admin login.
 - `ADMIN_SECRET` — HMAC signing secret for the admin session cookie. **Must be identical** across the app and middleware; changing it invalidates all admin sessions.
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — Google OAuth client for the customer Google One Tap login (NextAuth Credentials provider verifies the Google ID token server-side).
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` — same Client ID, exposed to the browser for the Google Identity Services (One Tap) script.
+- `NEXTAUTH_SECRET` — signing secret for the NextAuth JWT session (`openssl rand -base64 32`). `NEXTAUTH_URL` — full site URL. See `GOOGLE_OAUTH_SETUP.md` for the full walkthrough; run `supabase/auth-schema.sql` to create the `users`/`rewards` tables.
 
 ## Architecture
 

@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSession } from 'next-auth/react'
 import { useCartStore } from '@/store/cartStore'
+import { useAuthUi } from '@/store/authUiStore'
 
 export default function CartDrawer() {
   const router = useRouter()
+  const { status } = useSession()
+  const { openLogin } = useAuthUi()
   const { items, isDrawerOpen, closeDrawer, updateQuantity } = useCartStore()
   const [mounted, setMounted] = useState(false)
 
@@ -17,9 +21,12 @@ export default function CartDrawer() {
   const totalItems = items.reduce((s, i) => s + i.quantity, 0)
   const subtotal   = items.reduce((s, i) => s + i.price * i.quantity, 0)
 
+  const goToCheckout = () => router.push('/checkout')
+
   const handleCheckout = () => {
     closeDrawer()
-    router.push('/checkout')
+    if (status === 'authenticated') goToCheckout()
+    else openLogin(goToCheckout) // login popup first, then continue to checkout
   }
 
   if (!mounted) return null

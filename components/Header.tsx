@@ -3,14 +3,19 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Phone, MessageCircle } from 'lucide-react'
+import { Phone, MessageCircle, LogIn } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { WHATSAPP_URL, PHONE_NUMBER } from '@/data/products'
 import { useOrderStore } from '@/store/orderStore'
+import { useAuthUi } from '@/store/authUiStore'
+import UserMenu from '@/components/auth/UserMenu'
 import { useEffect, useState } from 'react'
 
 export default function Header() {
   const pathname = usePathname()
   const { orders } = useOrderStore()
+  const { status } = useSession()
+  const { openLogin } = useAuthUi()
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
@@ -88,6 +93,21 @@ export default function Header() {
             <span className="hidden sm:inline">Order on WhatsApp</span>
             <span className="sm:hidden">WhatsApp</span>
           </a>
+
+          {/* Auth: login button (logged out) or avatar menu (logged in) */}
+          {mounted && status === 'authenticated' ? (
+            <UserMenu />
+          ) : mounted && status === 'unauthenticated' ? (
+            <button
+              onClick={() => openLogin()}
+              data-testid="login-button"
+              className="min-tap flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold bg-white/10 hover:bg-white/20 text-brand-cream transition-colors"
+              aria-label="Login or sign up"
+            >
+              <LogIn size={16} className="flex-shrink-0" />
+              <span className="hidden sm:inline">Login</span>
+            </button>
+          ) : null}
         </div>
       </div>
     </header>
