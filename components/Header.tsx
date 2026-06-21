@@ -52,18 +52,16 @@ export default function Header() {
             <Phone size={20} className="text-brand-cream" />
           </a>
 
-          {/* WhatsApp pill */}
+          {/* WhatsApp (icon only) */}
           <a
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="whatsapp-button"
-            className="min-tap flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold text-sm px-4 py-2 rounded-full transition-colors"
+            className="min-tap flex items-center justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-full p-2 transition-colors"
             aria-label="Order on WhatsApp"
           >
-            <MessageCircle size={16} className="flex-shrink-0" />
-            <span className="hidden sm:inline">Order on WhatsApp</span>
-            <span className="sm:hidden">WhatsApp</span>
+            <MessageCircle size={20} className="flex-shrink-0" />
           </a>
 
           {/* Auth: login button (logged out) or avatar menu (logged in) */}
