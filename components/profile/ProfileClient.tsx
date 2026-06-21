@@ -28,6 +28,7 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedReward, setCopiedReward] = useState<string | null>(null)
 
   const areaLabel = areas.find(a => a.id === user.area)?.label ?? user.area ?? '—'
 
@@ -57,6 +58,12 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
     navigator.clipboard?.writeText(user.referral_code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const copyReward = (code: string) => {
+    navigator.clipboard?.writeText(code)
+    setCopiedReward(code)
+    setTimeout(() => setCopiedReward(null), 2000)
   }
 
   const shareUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -183,11 +190,23 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
                     Use this for 25% off your next order — valid once only
                   </p>
                 </div>
-                <span className={`flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  r.is_used ? 'bg-white/10 text-brand-cream/40' : 'bg-green-500/20 text-green-400'
-                }`}>
-                  {r.is_used ? 'Used' : 'Available'}
-                </span>
+                <div className="flex-shrink-0 flex items-center gap-2">
+                  {!r.is_used && (
+                    <button
+                      onClick={() => copyReward(r.code)}
+                      aria-label={`Copy reward code ${r.code}`}
+                      data-testid={`copy-reward-${r.code}`}
+                      className="min-tap w-9 h-9 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors text-brand-cream"
+                    >
+                      {copiedReward === r.code ? <Check size={16} className="text-brand-yellow" /> : <Copy size={16} />}
+                    </button>
+                  )}
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    r.is_used ? 'bg-white/10 text-brand-cream/40' : 'bg-green-500/20 text-green-400'
+                  }`}>
+                    {r.is_used ? 'Used' : 'Available'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

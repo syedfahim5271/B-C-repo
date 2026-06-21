@@ -18,9 +18,12 @@ interface OrderData {
   orderNumber: string
   items: { name: string; price: number; quantity: number }[]
   subtotal: number
+  discount?: number
   total?: number
   delivery: { name: string; phone: string; area: string; address: string; note?: string }
 }
+
+const DELIVERY_CHARGE = 30
 
 export default function ConfirmationPage() {
   const router = useRouter()
@@ -115,9 +118,27 @@ export default function ConfirmationPage() {
             </div>
           ))}
 
-          <div className="border-t border-white/8 pt-3 flex justify-between font-bold">
-            <span className="text-brand-cream">Total</span>
-            <span className="text-brand-yellow text-lg">৳{order.subtotal}</span>
+          <div className="border-t border-white/8 pt-3 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-brand-cream/60">Subtotal</span>
+              <span className="text-brand-cream">৳{order.subtotal}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-brand-cream/60">Delivery charge</span>
+              <span className="text-brand-cream">৳{DELIVERY_CHARGE}</span>
+            </div>
+            {order.discount ? (
+              <div className="flex justify-between text-sm">
+                <span className="text-brand-yellow/80">Discount</span>
+                <span className="text-brand-yellow font-semibold">−৳{order.discount}</span>
+              </div>
+            ) : null}
+            <div className="flex justify-between font-bold pt-1.5 border-t border-white/8">
+              <span className="text-brand-cream">Total</span>
+              <span className="text-brand-yellow text-lg" data-testid="order-total">
+                ৳{order.total ?? order.subtotal - (order.discount ?? 0) + DELIVERY_CHARGE}
+              </span>
+            </div>
           </div>
 
           <div className="border-t border-white/8 pt-3 space-y-1">
