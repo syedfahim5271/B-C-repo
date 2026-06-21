@@ -49,6 +49,7 @@ export interface DBOrder {
   delivery: { name: string; phone: string; area: string; address: string; note?: string }
   status: string
   placed_at: string
+  user_id: string | null
 }
 
 export interface DBBanner {
