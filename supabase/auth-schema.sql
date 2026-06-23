@@ -19,7 +19,7 @@ create table if not exists users (
 );
 
 -- Rewards: each row is BOTH a referral redemption record and the
--- referrer's one-time 25% reward code.
+-- referrer's one-time 15% reward code.
 --   referrer_id        -> the user who owns the referral code (gets the reward)
 --   referred_user_id   -> the user who redeemed the referral code (unique => once per user)
 --   code               -> the GIFT-XXXX reward code the referrer can spend once

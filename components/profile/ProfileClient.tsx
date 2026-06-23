@@ -67,7 +67,7 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
   }
 
   const shareUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const shareText = `Get 25% off your first Biryani & Chill order! 🍚 Use my code ${user.referral_code} at checkout. ${shareUrl}`
+  const shareText = `Get 15% off your first Biryani & Chill order! 🍚 Use my code ${user.referral_code} at checkout. ${shareUrl}`
   const whatsappShare = `https://wa.me/?text=${encodeURIComponent(shareText)}`
 
   return (
@@ -148,7 +148,7 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
       {/* ---- Referral code ---- */}
       <section id="referral" className="scroll-mt-20 bg-gradient-to-br from-brand-yellow/15 to-white/5 border border-brand-yellow/20 rounded-2xl p-5">
         <h2 className="font-display font-semibold text-brand-cream mb-1">Your Referral Code</h2>
-        <p className="text-brand-cream/50 text-sm mb-4">Share it — friends get 25% off, and you earn a 25% reward for each one who orders.</p>
+        <p className="text-brand-cream/50 text-sm mb-4">Share it — friends get 15% off, and you earn a 15% reward for each one who orders.</p>
         <div className="flex items-center gap-2 mb-3">
           <div className="flex-1 bg-brand-dark/60 border border-brand-yellow/30 rounded-xl px-4 py-3 font-display font-bold text-brand-yellow text-lg tracking-widest text-center" data-testid="referral-code">
             {user.referral_code}
@@ -187,7 +187,7 @@ export default function ProfileClient({ user, rewards, areas }: Props) {
                     {r.code}
                   </p>
                   <p className="text-brand-cream/50 text-xs mt-0.5">
-                    Use this for 25% off your next order — valid once only
+                    Use this for 15% off your next order — valid once only
                   </p>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2">

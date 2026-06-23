@@ -1,7 +1,7 @@
 // Shared promo/referral types and constants. Kept out of the 'use server'
 // actions file, which may only export async functions.
 
-export const REFERRAL_DISCOUNT_PCT = 25
+export const REFERRAL_DISCOUNT_PCT = 15
 
 export type PromoKind = 'promo' | 'referral' | 'reward'
 

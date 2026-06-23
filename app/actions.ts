@@ -60,7 +60,7 @@ export async function saveOrder(payload: OrderPayload): Promise<{ success: boole
 /**
  * After an order is saved, record what the promo/referral/reward code did:
  *  - promo    → bump usage_count
- *  - referral → mint a one-time 25% reward code for the referrer (also records
+ *  - referral → mint a one-time 15% reward code for the referrer (also records
  *               that this user redeemed a referral, enforcing once-per-user)
  *  - reward   → mark the reward code as used so it can't be reused
  */
@@ -140,7 +140,7 @@ export async function updateProfile(patch: ProfileInput): Promise<{ success: boo
  * Validate a code entered in the checkout promo field. It can be one of:
  *  1. a marketing promo code (`promo_codes`)
  *  2. a one-time referral reward code, GIFT-XXXX (`rewards`)
- *  3. another user's referral code (`users.referral_code`) → 25% for the buyer
+ *  3. another user's referral code (`users.referral_code`) → 15% for the buyer
  * The signed-in user's id is read from the session (referral self-use / once-per-user checks).
  */
 export async function validatePromoCode(raw: string): Promise<PromoResult> {
