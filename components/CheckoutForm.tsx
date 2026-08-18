@@ -11,6 +11,7 @@ import { useCartStore } from '@/store/cartStore'
 import { useOrderStore } from '@/store/orderStore'
 import { PROMO_CODES } from '@/data/products'
 import { saveOrder, validatePromoCode, updateProfile } from '@/app/actions'
+import { STORE_CLOSED, CLOSED_MESSAGE } from '@/lib/storeStatus'
 import type { PromoKind } from '@/lib/promo'
 import SignInPrompt from '@/components/auth/SignInPrompt'
 import type { DBArea, DBUser } from '@/lib/supabase'
@@ -94,8 +95,10 @@ export default function CheckoutForm({ areas, user }: Props) {
         referrerId: result.kind === 'referral' ? result.referrerId : undefined,
       })
       setPromoError('')
-    } else if (PROMO_CODES[code]) {
-      // Offline fallback for the seeded marketing codes.
+    } else if (!result && PROMO_CODES[code]) {
+      // Offline fallback for the seeded marketing codes — only when the server
+      // was unreachable. A returned 'invalid' verdict is authoritative and must
+      // not be overridden here, or a per-customer usage limit would be bypassed.
       const p = PROMO_CODES[code]
       setApplied({ code, type: p.type, discount: p.discount, label: p.label, kind: 'promo' })
       setPromoError('')
@@ -112,6 +115,7 @@ export default function CheckoutForm({ areas, user }: Props) {
   }
 
   const onSubmit = (data: DeliveryForm) => {
+    if (STORE_CLOSED) return // safety net — server also rejects while closed
     setSubmitting(true)
     const orderNum = `BC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${String(Math.floor(Math.random() * 900) + 100)}`
 
@@ -147,6 +151,23 @@ export default function CheckoutForm({ areas, user }: Props) {
     clearCart()
 
     setTimeout(() => router.push('/confirmation'), 300)
+  }
+
+  // Temporarily closed — no checkout at all while the kitchen is shut for a few days.
+  if (STORE_CLOSED) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center px-4">
+        <span className="text-6xl mb-4">❤️</span>
+        <h2 className="font-display font-bold text-xl text-brand-cream mb-3">We&apos;re temporarily closed</h2>
+        <p className="text-brand-cream/60 max-w-sm mb-6 leading-relaxed">{CLOSED_MESSAGE}</p>
+        <button
+          onClick={() => router.push('/')}
+          className="bg-brand-yellow text-brand-dark font-bold px-6 py-3 rounded-full hover:bg-brand-gold transition-colors"
+        >
+          Back to Menu
+        </button>
+      </div>
+    )
   }
 
   if (status === 'loading') {

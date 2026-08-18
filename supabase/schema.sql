@@ -61,6 +61,8 @@ create table if not exists promo_codes (
   label       text not null,
   is_active   boolean default true,
   usage_count int default 0,
+  -- How many times a single customer may use this code. null = unlimited.
+  per_user_limit int check (per_user_limit is null or per_user_limit > 0),
   created_at  timestamptz default now()
 );
 

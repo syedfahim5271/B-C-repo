@@ -69,6 +69,8 @@ export interface DBPromo {
   label: string
   is_active: boolean
   usage_count: number
+  /** How many times one customer may use this code. null = unlimited. */
+  per_user_limit: number | null
   created_at: string
 }
 

@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthUi } from '@/store/authUiStore'
+import { STORE_CLOSED, CLOSED_LABEL } from '@/lib/storeStatus'
 
 export default function CartBar() {
   const router = useRouter()
@@ -35,6 +36,7 @@ export default function CartBar() {
 
   const goToCheckout = () => router.push('/checkout')
   const handleCheckout = () => {
+    if (STORE_CLOSED) return
     if (status === 'authenticated') goToCheckout()
     else openLogin(goToCheckout) // login popup first, then continue to checkout
   }
@@ -87,15 +89,16 @@ export default function CartBar() {
               </p>
             </button>
 
-            {/* Checkout CTA */}
+            {/* Checkout CTA — disabled while temporarily closed */}
             <button
               onClick={handleCheckout}
+              disabled={STORE_CLOSED}
               data-testid="checkout-btn"
-              className="flex items-center gap-2 bg-brand-dark text-brand-cream font-bold text-sm px-5 py-3 rounded-xl hover:bg-brand-dark/80 transition-colors active:scale-95"
-              aria-label="Go to checkout"
+              className="flex items-center gap-2 bg-brand-dark text-brand-cream font-bold text-sm px-5 py-3 rounded-xl hover:bg-brand-dark/80 transition-colors active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-dark"
+              aria-label={STORE_CLOSED ? CLOSED_LABEL : 'Go to checkout'}
             >
-              Checkout
-              <ArrowRight size={16} />
+              {STORE_CLOSED ? CLOSED_LABEL : 'Checkout'}
+              {!STORE_CLOSED && <ArrowRight size={16} />}
             </button>
           </div>
         </div>

@@ -166,12 +166,17 @@ export async function updateBanner(formData: FormData) {
 // ── Promo Codes ─────────────────────────────────────────────
 
 export async function createPromo(formData: FormData) {
+  // Blank / 0 / junk in the "uses per customer" field all mean unlimited.
+  const rawLimit = Number(formData.get('per_user_limit'))
+  const perUserLimit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.floor(rawLimit) : null
+
   await supabase.from('promo_codes').insert({
     code:     (formData.get('code') as string).toUpperCase().trim(),
     type:     formData.get('type'),
     discount: Number(formData.get('discount')),
     label:    formData.get('label'),
     is_active: true,
+    per_user_limit: perUserLimit,
   })
   revalidatePath('/admin/promos')
 }

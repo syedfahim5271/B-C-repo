@@ -42,6 +42,14 @@ export default async function PromosPage() {
             <input name="discount" type="number" min="1" placeholder="e.g. 20" required
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:border-brand-yellow/60 transition-colors" />
           </div>
+          <div className="sm:col-span-2">
+            <label className="block text-brand-cream/60 text-xs font-medium mb-1.5 uppercase tracking-wider">Uses Per Customer</label>
+            <input name="per_user_limit" type="number" min="1" step="1" placeholder="Leave blank for unlimited"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-brand-cream placeholder:text-brand-cream/30 focus:outline-none focus:border-brand-yellow/60 transition-colors" />
+            <p className="text-brand-cream/30 text-xs mt-1.5">
+              How many times one signed-in customer can use this code. Enter 1 to make it a one-per-customer code.
+            </p>
+          </div>
           <button type="submit"
             className="sm:col-span-2 bg-brand-yellow text-brand-dark font-bold py-3.5 rounded-xl hover:bg-brand-gold transition-colors">
             Create Promo Code
@@ -72,6 +80,12 @@ export default async function PromosPage() {
                 <div className="text-center">
                   <p className="font-bold text-brand-cream text-xl">{promo.usage_count}</p>
                   <p className="text-brand-cream/30 text-xs">times used</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-brand-cream text-xl">{promo.per_user_limit ?? '∞'}</p>
+                  <p className="text-brand-cream/30 text-xs">
+                    {promo.per_user_limit ? 'per customer' : 'unlimited per customer'}
+                  </p>
                 </div>
               </div>
 

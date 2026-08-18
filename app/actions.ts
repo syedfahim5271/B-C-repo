@@ -5,6 +5,7 @@ import type { CartItem } from '@/store/cartStore'
 import { getSession } from '@/lib/session'
 import { updateUserProfile, generateRewardCode, hasRedeemedReferral } from '@/lib/users'
 import { REFERRAL_DISCOUNT_PCT, type PromoKind, type PromoResult } from '@/lib/promo'
+import { STORE_CLOSED, CLOSED_MESSAGE } from '@/lib/storeStatus'
 
 export interface OrderPayload {
   orderNumber: string
@@ -19,10 +20,28 @@ export interface OrderPayload {
 }
 
 export async function saveOrder(payload: OrderPayload): Promise<{ success: boolean; error?: string }> {
+  // Hard kill switch — while the store is temporarily closed, reject every order
+  // no matter what the client sends. This is the authoritative block.
+  if (STORE_CLOSED) {
+    return { success: false, error: CLOSED_MESSAGE }
+  }
   try {
     // Bind the order to the signed-in user, if any (never trust a client id).
     const session = await getSession()
     const userId = session?.user?.id ?? null
+
+    // Re-check the per-customer promo limit server-side. validatePromoCode
+    // already checked it, but a stale tab could replay a code the customer
+    // has since used up, so the authoritative check happens here.
+    if (payload.promoCode && (payload.promoKind ?? 'promo') === 'promo') {
+      const { data: promo } = await supabase
+        .from('promo_codes')
+        .select('per_user_limit')
+        .eq('code', payload.promoCode)
+        .maybeSingle()
+      const limitError = await perUserLimitError(promo?.per_user_limit ?? null, payload.promoCode, userId)
+      if (limitError) return { success: false, error: limitError }
+    }
 
     const { error } = await supabase.from('orders').insert({
       order_number:    payload.orderNumber,
@@ -57,6 +76,33 @@ export async function saveOrder(payload: OrderPayload): Promise<{ success: boole
   }
 }
 
+/** How many times this customer has already redeemed a given promo code. */
+async function promoUsesByUser(code: string, userId: string): Promise<number> {
+  const { count } = await supabase
+    .from('promo_redemptions')
+    .select('id', { count: 'exact', head: true })
+    .eq('code', code)
+    .eq('user_id', userId)
+  return count ?? 0
+}
+
+/**
+ * Per-customer usage guard for a marketing promo code. `limit` is the code's
+ * `per_user_limit` (null = unlimited). Returns the message to show the
+ * customer when they may not use it again, or null when they still may.
+ */
+async function perUserLimitError(limit: number | null, code: string, userId: string | null): Promise<string | null> {
+  if (!limit) return null
+  // A limit is only enforceable against an account, so a limited code
+  // requires signing in (checkout already does).
+  if (!userId) return 'Sign in to use this code.'
+  const used = await promoUsesByUser(code, userId)
+  if (used < limit) return null
+  return limit === 1
+    ? "You've already used this code."
+    : `You can only use this code ${limit} times.`
+}
+
 /**
  * After an order is saved, record what the promo/referral/reward code did:
  *  - promo    → bump usage_count
@@ -73,6 +119,12 @@ async function applyPromoSideEffects(payload: OrderPayload, userId: string | nul
     if (promo) {
       await supabase.from('promo_codes').update({ usage_count: promo.usage_count + 1 }).eq('code', code)
     }
+    // Record the redemption — counting these rows is what enforces per_user_limit.
+    await supabase.from('promo_redemptions').insert({
+      code,
+      user_id: userId,
+      order_number: payload.orderNumber,
+    })
     return
   }
 
@@ -153,11 +205,13 @@ export async function validatePromoCode(raw: string): Promise<PromoResult> {
   // 1. Marketing promo code
   const { data: promo } = await supabase
     .from('promo_codes')
-    .select('code, type, discount, label')
+    .select('code, type, discount, label, per_user_limit')
     .eq('code', code)
     .eq('is_active', true)
     .maybeSingle()
   if (promo) {
+    const limitError = await perUserLimitError(promo.per_user_limit, promo.code, userId ?? null)
+    if (limitError) return { kind: 'invalid', reason: limitError }
     return { kind: 'promo', code: promo.code, type: promo.type, discount: promo.discount, label: promo.label }
   }
 

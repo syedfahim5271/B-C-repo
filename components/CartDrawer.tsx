@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthUi } from '@/store/authUiStore'
+import { STORE_CLOSED, CLOSED_MESSAGE, CLOSED_LABEL } from '@/lib/storeStatus'
 
 export default function CartDrawer() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function CartDrawer() {
   const goToCheckout = () => router.push('/checkout')
 
   const handleCheckout = () => {
+    if (STORE_CLOSED) return
     closeDrawer()
     if (status === 'authenticated') goToCheckout()
     else openLogin(goToCheckout) // login popup first, then continue to checkout
@@ -151,14 +153,15 @@ export default function CartDrawer() {
                   </span>
                 </div>
                 <p className="text-brand-cream/40 text-xs">
-                  Delivery charge varies by area
+                  {STORE_CLOSED ? CLOSED_MESSAGE : 'Delivery charge varies by area'}
                 </p>
                 <button
                   onClick={handleCheckout}
+                  disabled={STORE_CLOSED}
                   data-testid="proceed-checkout-btn"
-                  className="w-full bg-brand-yellow text-brand-dark font-bold text-base py-4 rounded-2xl hover:bg-brand-gold transition-colors active:scale-[0.98]"
+                  className="w-full bg-brand-yellow text-brand-dark font-bold text-base py-4 rounded-2xl hover:bg-brand-gold transition-colors active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-yellow disabled:active:scale-100"
                 >
-                  Proceed to Checkout →
+                  {STORE_CLOSED ? CLOSED_LABEL : 'Proceed to Checkout →'}
                 </button>
               </div>
             )}

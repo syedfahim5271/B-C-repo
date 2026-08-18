@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Plus, Minus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCartStore } from '@/store/cartStore'
+import { STORE_CLOSED, CLOSED_LABEL } from '@/lib/storeStatus'
 import type { DBProduct } from '@/lib/supabase'
 
 interface Props {
@@ -70,6 +71,14 @@ export default function ProductCard({ product }: Props) {
             ৳{product.price}
           </span>
 
+          {STORE_CLOSED ? (
+            <span
+              data-testid={`closed-${product.id}`}
+              className="min-tap flex items-center text-brand-cream/40 font-semibold text-xs px-4 py-2.5 rounded-full bg-white/5 border border-white/10 cursor-not-allowed"
+            >
+              {CLOSED_LABEL}
+            </span>
+          ) : (
           <AnimatePresence mode="wait">
             {qty === 0 ? (
               <motion.button
@@ -125,6 +134,7 @@ export default function ProductCard({ product }: Props) {
               </motion.div>
             )}
           </AnimatePresence>
+          )}
         </div>
       </div>
     </article>

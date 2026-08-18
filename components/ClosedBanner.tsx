@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Moon } from 'lucide-react'
+import { STORE_CLOSED, CLOSED_MESSAGE } from '@/lib/storeStatus'
 
 const OPEN_HOUR = 11  // 11:00 AM Dhaka
 const CLOSE_HOUR = 23 // 11:00 PM Dhaka
@@ -26,6 +27,21 @@ function isClosed(date: Date): boolean {
  * its own — e.g. it vanishes the moment 11 AM Dhaka hits, no page refresh
  * needed. Dhaka's whole-hour offset means its boundaries align with UTC ones.
  */
+// Manual "temporarily closed for a few days" override. Takes priority over the
+// nightly hours banner. It's a build-time constant, so it renders immediately
+// (identical on server and client — no hydration mismatch, no hooks needed).
+function ManualClosedBanner() {
+  return (
+    <div
+      style={{ backgroundColor: '#FCEBEB', color: '#791F1F' }}
+      className="w-full px-4 py-3 flex items-center justify-center gap-2 text-center text-sm font-semibold leading-snug"
+      role="status"
+    >
+      <span>{CLOSED_MESSAGE}</span>
+    </div>
+  )
+}
+
 export default function ClosedBanner() {
   const [mounted, setMounted] = useState(false)
   const [closed, setClosed] = useState(false)
@@ -49,6 +65,9 @@ export default function ClosedBanner() {
     evaluate()
     return () => clearTimeout(timer)
   }, [])
+
+  // Manual multi-day closure wins over the time-of-day banner.
+  if (STORE_CLOSED) return <ManualClosedBanner />
 
   // Avoid SSR/hydration mismatch — only render after the client knows the time.
   if (!mounted || !closed) return null
